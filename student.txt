@@ -1,0 +1,15 @@
+API yang digunakan: https://story-api.dicoding.dev/v1
+Fitur: Menampilkan daftar cerita (story) dari API, setiap item memuat:
+- Gambar (story.photoUrl)
+- Nama (story.name)
+- Deskripsi (story.description)
+- Tanggal (story.createdAt)
+
+Peta digital:
+- Menggunakan: Leaflet.js
+- Sumber tile map: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+- Marker ditambahkan berdasarkan koordinat (story.lat, story.lon)
+- Popup marker menampilkan nama dan deskripsi
+- Tidak membutuhkan API Key (karena memakai OpenStreetMap + Leaflet)
+
+Catatan: Aplikasi ini menampilkan semua data sesuai ketentuan dan tidak memerlukan API Key tambahan untuk map service.
