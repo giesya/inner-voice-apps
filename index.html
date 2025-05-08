@@ -9,8 +9,11 @@
     <link rel="stylesheet" href="./src/style.css" />
 </head>
 <body>
+    <!-- Skip to content button -->
+    <a href="#/" class="skip-link" id="skip-to-content" accesskey="k">Langsung ke konten utama (Alt+K)</a>
+
     <header>
-    <h1><i class="fa-solid fa-heart-circle-bolt"></i> Inner Voice: Share Your Story!</h1>
+        <h1><i class="fa-solid fa-heart-circle-bolt"></i> Inner Voice: Share Your Story!</h1>
     <nav>
         <a href="#/" aria-label="Beranda"><i class="fas fa-home"></i> Beranda</a>
         <a href="#/add" aria-label="Tambah Cerita"><i class="fas fa-plus-circle"></i> Tambah</a>
@@ -18,9 +21,26 @@
     </nav>
     </header>
 
-    <a href="#maincontent" class="skip-link">Langsung ke konten utama</a>
+    <main id="maincontent" tabindex="-1">
+    <ul id="stories-list"></ul>
+    </main>
 
-    <main id="maincontent" tabindex="-1"></main>
+    <section id="add-story-form" style="display: none;">
+    <h2>Tambah Cerita</h2>
+    <form id="add-form">
+        <label for="story-title">Judul Cerita:</label>
+        <input type="text" id="story-title" required />
+
+        <label for="story-photo">Foto Cerita:</label>
+        <input type="file" id="story-photo" accept="image/*" capture="camera" required />
+
+        <label for="story-location">Lokasi:</label>
+        <button type="button" id="get-location">Ambil Lokasi</button>
+        <span id="location"></span>
+
+        <button type="submit">Tambah Cerita</button>
+    </form>
+    </section>
 
     <footer>
     <div class="footer-content">
@@ -29,7 +49,36 @@
     </footer>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/view/storyView.js"></script>
+    <script type="module" src="./src/presenter/storyPresenter.js"></script>
+
+    <script>
+    // Shortcut keyboard Alt+K = langsung ke Beranda
+    document.addEventListener('keydown', (event) => {
+        if (event.altKey && event.key.toLowerCase() === 'k') {
+        window.location.hash = '#/';
+        setTimeout(() => {
+            document.getElementById('maincontent').focus();
+        }, 100);
+        }
+    });
+
+    // Saat klik tombol Skip
+    document.getElementById('skip-to-content').addEventListener('click', (e) => {
+        window.location.hash = '#/';
+        setTimeout(() => {
+        document.getElementById('maincontent').focus();
+        }, 100);
+    });
+
+    // Ambil lokasi
+    document.getElementById('get-location').addEventListener('click', function() {
+        navigator.geolocation.getCurrentPosition(function(position) {
+        document.getElementById('location').textContent = 
+            `Lat: ${position.coords.latitude}, Long: ${position.coords.longitude}`;
+        });
+    });
+    </script>
 </body>
 </html>

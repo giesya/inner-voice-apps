@@ -1,6 +1,6 @@
 const API_BASE = 'https://story-api.dicoding.dev/v1';
 
-// Fungsi untuk register user baru
+// register user baru
 async function registerUser(email, password, name='User') {
   try {
     console.log('Registering user:', email);
@@ -16,7 +16,7 @@ async function registerUser(email, password, name='User') {
   }
 }
 
-// Fungsi untuk login user
+// login user
 async function loginUser(email, password) {
   try {
     console.log('Logging in user:', email);
@@ -32,7 +32,7 @@ async function loginUser(email, password) {
   }
 }
 
-// Fungsi untuk mengambil list cerita
+// mengambil list cerita
 async function fetchStories(token = null) {
   try {
     console.log('Fetching stories, token exists:', !!token);
@@ -46,7 +46,7 @@ async function fetchStories(token = null) {
   }
 }
 
-// Fungsi untuk mengambil detail cerita
+// mengambil detail cerita
 async function fetchStoryDetail(id, token = null) {
   try {
     console.log('Fetching story detail:', id);
@@ -60,7 +60,7 @@ async function fetchStoryDetail(id, token = null) {
   }
 }
 
-// Fungsi untuk menambah cerita baru
+// menambah cerita baru
 async function addStory(formData, token = null) {
   try {
     console.log('Adding new story, token exists:', !!token);

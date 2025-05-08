@@ -113,21 +113,24 @@
   }
 
   .skip-link {
-    position: absolute;
-    top: -50px;
-    left: 10px;
-    background: var(--accent-color);
-    color: var(--primary-dark);
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
     padding: 8px 16px;
-    z-index: 999;
-    transition: top 0.3s;
-    border-radius: 0 0 5px 5px;
-    font-weight: bold;
     text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    margin: 1rem;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
-  
+
   .skip-link:focus {
-    top: 0;
+    outline: 2px dashed yellow;
+    outline-offset: 4px;
   }
 
   main {
@@ -154,6 +157,20 @@
     margin: 0 auto;
     padding: 0 1rem;
   }
+
+  #skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #000;
+    color: #fff;
+    padding: 10px;
+    text-decoration: none;
+  }
+  
+  #skip-to-content:focus {
+    top: 0;
+  }  
   
   .social-links {
     display: flex;
@@ -504,23 +521,67 @@
   }
   
   #capture {
-    background-color: var(--primary-color);
+    background-color: #28a745; /* hijau cerah */
     color: white;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 3rem;
-    background-color: #f9f9f9;
-    border-radius: 12px;
-    grid-column: 1 / -1;
+    border: none;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
   }
   
-  .empty-state i {
-    font-size: 3rem;
-    color: var(--text-light);
-    margin-bottom: 1rem;
+  #capture:hover {
+    background-color: #218838; /* warna lebih gelap saat hover */
   }
+  
+  #retake {
+    background-color: #ffc107; /* warna kuning */
+    color: #212529;
+    border: none;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 8px;
+    display: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  #retake:hover {
+    background-color: #e0a800;
+  }  
+
+  .tooltip-shortcut {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: #333;
+    color: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .tooltip-shortcut.show {
+    opacity: 1;
+  }
+  
+  .tooltip-shortcut button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }  
 
   @media (max-width: 768px) {
     header {

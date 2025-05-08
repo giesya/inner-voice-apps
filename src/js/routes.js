@@ -4,12 +4,12 @@ import { showAddView } from './views/addView.js';
 import { showLoginView } from './views/loginView.js';
 import { showError } from './utils/helpers.js';
 
-// Fungsi router untuk navigasi
+// untuk navigasi
 function router() {
   const hash = location.hash || '#/';
   const route = hash.substring(1);
   
-  // Log untuk debugging
+  // untuk debugging
   console.log('Route changed to:', route);
   
   // Tentukan view yang akan ditampilkan

@@ -15,7 +15,7 @@ function showError(message, containerId = 'maincontent') {
   `;
 }
 
-// Fungsi untuk preview gambar
+// preview gambar
 function setupImagePreview(fileInputId, previewImageId) {
   const fileInput = document.getElementById(fileInputId);
   const preview = document.getElementById(previewImageId);
