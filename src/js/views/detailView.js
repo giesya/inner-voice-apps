@@ -1,93 +1,74 @@
-import { fetchStoryDetail } from '../api.js';
+import { DetailModel } from '../models/detailModel.js';
 import { initStoryDetailMap } from '../utils/mapUtils.js';
-import { showLoading, showError, formatDate, pageTransition } from '../utils/helpers.js';
+import { formatDate } from '../utils/helpers.js';
 
-// Render detail story
-function renderStoryDetail(story) {
-  console.log('Rendering story detail for:', story.id);
-  
-  const mainContent = document.getElementById('maincontent');
-  if (!mainContent) {
-    console.error('Main content element not found');
-    return;
+export class DetailView {
+  constructor() {
+    this.model = new DetailModel();
+    this.presenter = null;
   }
-  
-  mainContent.innerHTML = '';
-  pageTransition();
-  const detailContainer = document.createElement('div');
-  detailContainer.className = 'story-detail-container';
 
-  const backButton = document.createElement('button');
-  backButton.className = 'back-button';
-  backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Kembali';
-  backButton.onclick = () => { location.hash = '#/'; };
-  detailContainer.appendChild(backButton);
-
-  const storyTitle = document.createElement('h2');
-  storyTitle.textContent = story.name;
-  detailContainer.appendChild(storyTitle);
-
-  const storyImage = document.createElement('img');
-  storyImage.src = story.photoUrl;
-  storyImage.alt = `Foto cerita oleh ${story.name}`;
-  storyImage.className = 'detail-image';
-  detailContainer.appendChild(storyImage);
-  
-  // Story info
-  const storyInfo = document.createElement('div');
-  storyInfo.className = 'story-info-detail';
-  
-  const storyDesc = document.createElement('p');
-  storyDesc.className = 'story-description';
-  storyDesc.textContent = story.description;
-  storyInfo.appendChild(storyDesc);
-  
-  const storyMeta = document.createElement('div');
-  storyMeta.className = 'story-meta';
-  storyMeta.innerHTML = `
-    <span><i class="fas fa-user"></i> ${story.name}</span>
-    <span><i class="fas fa-calendar-alt"></i> ${formatDate(story.createdAt)}</span>
-  `;
-  storyInfo.appendChild(storyMeta);
-  
-  detailContainer.appendChild(storyInfo);
-  
-  // Map section untuk coordinates exist
-  const mapSection = document.createElement('div');
-  mapSection.className = 'map-section';
-  mapSection.innerHTML = `
-    <h3>Lokasi</h3>
-    <div id="storyMap"></div>
-  `;
-  detailContainer.appendChild(mapSection);
-  
-  mainContent.appendChild(detailContainer);
-  
-  // inisialisasi map setelah element di added to the DOM
-  setTimeout(() => {
-    initStoryDetailMap('storyMap', story);
-  }, 100);
-}
-
-// Fetch and show detail story
-async function showDetailView(id) {
-  showLoading();
-  
-  try {
-    const token = localStorage.getItem('token');
-    const data = await fetchStoryDetail(id, token);
-    
-    if (!data.error) {
-      renderStoryDetail(data.story);
-    } else {
-      showError('Gagal mengambil detail cerita: ' + data.message);
+  showLoading() {
+    const mainContent = document.getElementById('maincontent');
+    if (mainContent) {
+      mainContent.innerHTML = `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Memuat detail cerita...</p>
+        </div>
+      `;
     }
-  } catch (error) {
-    console.error('Error in showDetailView:', error);
-    showError('Terjadi kesalahan saat mengambil detail cerita');
+  }
+
+  showError(message) {
+    alert(message);
+  }
+
+  renderStoryDetail(story) {
+    const mainContent = document.getElementById('maincontent');
+    if (!mainContent) return;
+
+    mainContent.innerHTML = `
+      <div class="story-detail-container">
+        <button class="back-button" onclick="location.hash='#/'">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+
+        <div class="story-detail-content">
+          <div class="story-detail-header">
+            <h2>${story.name}</h2>
+            <div class="story-meta">
+              <span><i class="fas fa-user"></i> ${story.name}</span>
+              <span><i class="fas fa-calendar-alt"></i> ${formatDate(story.createdAt)}</span>
+            </div>
+          </div>
+
+          <div class="story-detail-body">
+            <div class="story-image-container">
+              <img src="${story.photoUrl}" alt="Foto cerita ${story.name}" class="detail-image" loading="lazy">
+            </div>
+            
+            <div class="story-description">
+              <p>${story.description}</p>
+            </div>
+          </div>
+
+          <div class="story-location-section">
+            <h3><i class="fas fa-map-marker-alt"></i> Lokasi Cerita</h3>
+            <div id="map" class="story-map"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Initialize map after story detail is rendered
+    if (story.lat && story.lon) {
+      initStoryDetailMap('map', story);
+    }
+  }
+
+  showDetailView(id) {
+    this.showLoading();
+    this.presenter.loadStoryDetail(id);
   }
 }
-
-export {
-  showDetailView
-};

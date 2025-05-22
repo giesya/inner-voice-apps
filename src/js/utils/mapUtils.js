@@ -4,184 +4,150 @@ let marker = null;
 let selectedLat = null;
 let selectedLon = null;
 
-// Inisialisasi peta untuk daftar cerita
-function initStoryListMap(containerId, stories) {
-  console.log('Initializing story list map with', stories.length, 'stories');
+// Initialize map for story list
+export function initStoryListMap(containerId, stories) {
+  const map = L.map(containerId).setView([-6.2088, 106.8456], 13);
   
-  // Hapus peta yang sudah ada jika ada
-  if (map) {
-    console.log('Removing existing map');
-    map.remove();
-    map = null;
-  }
-  
-  const mapContainer = document.getElementById(containerId);
-  if (!mapContainer) {
-    console.error('Map container not found:', containerId);
-    return null;
-  }
-  
-  // Buat peta baru
-  try {
-    map = L.map(containerId).setView([0, 0], 2);
-    
-    // Tambahkan tile layer default
-    const defaultLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    // Tambahkan layer control dan tile alternatif (kriteria opsional 4)
-    const satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      attribution: '© Google'
-    });
-    
-    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenTopoMap contributors'
-    });
-    
+  // Base layers
     const baseMaps = {
-      "Streets": defaultLayer,
-      "Satellite": satellite,
-      "Topographic": topo
-    };
-    
+    "Default": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }),
+    "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    }),
+    "Terrain": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+    })
+  };
+
+  // Add default layer
+  baseMaps["Default"].addTo(map);
+
+  // Add layer control
     L.control.layers(baseMaps).addTo(map);
 
-    // Tambahkan marker untuk setiap cerita
-    for (const story of stories) {
+  // Add markers for each story
+  stories.forEach(story => {
       if (story.lat && story.lon) {
-        console.log('Adding marker for story:', story.id, story.lat, story.lon);
-        L.marker([story.lat, story.lon])
-          .addTo(map)
-          .bindPopup(`<b>${story.name}</b><br/>${story.description}`);
-      }
+      const marker = L.marker([story.lat, story.lon]).addTo(map);
+      marker.bindPopup(`
+        <div class="popup-content">
+          <img src="${story.photoUrl}" alt="Foto cerita ${story.name}" style="width: 100%; max-height: 150px; object-fit: cover; margin-bottom: 10px;">
+          <h3>${story.name}</h3>
+          <p>${story.description.substring(0, 100)}${story.description.length > 100 ? '...' : ''}</p>
+          <a href="#/story/${story.id}" class="btn-detail">Lihat Detail</a>
+        </div>
+      `);
     }
-    
-    // Jika ada cerita dengan lokasi, set view ke cerita pertama
-    const storiesWithLocation = stories.filter(story => story.lat && story.lon);
-    if (storiesWithLocation.length > 0) {
-      const firstStory = storiesWithLocation[0];
-      map.setView([firstStory.lat, firstStory.lon], 7);
-    }
+  });
     
     return map;
-  } catch (error) {
-    console.error('Error initializing map:', error);
-    return null;
-  }
 }
 
-// Inisialisasi peta untuk detail cerita
-function initStoryDetailMap(containerId, story) {
-  console.log('Initializing story detail map for:', story.id);
+// Initialize map for story detail
+export function initStoryDetailMap(containerId, story) {
+  const map = L.map(containerId).setView([story.lat, story.lon], 13);
   
-  // Hapus peta yang sudah ada jika ada
-  if (map) {
-    console.log('Removing existing map');
-    map.remove();
-    map = null;
-  }
-  
-  const mapContainer = document.getElementById(containerId);
-  if (!mapContainer) {
-    console.error('Map container not found:', containerId);
-    return null;
-  }
-  
-  // Tentukan lokasi default jika story tidak memiliki koordinat
-  const lat = story.lat || -2.548;
-  const lon = story.lon || 118.014;
-  
-  // Buat peta baru
-  try {
-    map = L.map(containerId).setView([lat, lon], 10);
-    
-    // Tambahkan tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-    
-    // Tambahkan marker jika ada koordinat
-    if (story.lat && story.lon) {
-      console.log('Adding marker for location:', story.lat, story.lon);
-      marker = L.marker([story.lat, story.lon]).addTo(map).bindPopup(story.name);
-    } else {
-      console.log('Story has no location data');
-    }
+  // Base layers
+  const baseMaps = {
+    "Default": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }),
+    "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    }),
+    "Terrain": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+    })
+  };
+
+  // Add default layer
+  baseMaps["Default"].addTo(map);
+
+  // Add layer control
+  L.control.layers(baseMaps).addTo(map);
+
+  // Add marker for story location
+  const marker = L.marker([story.lat, story.lon]).addTo(map);
+  marker.bindPopup(`
+    <div class="popup-content">
+      <img src="${story.photoUrl}" alt="Foto cerita ${story.name}" style="width: 100%; max-height: 150px; object-fit: cover; margin-bottom: 10px;">
+      <h3>${story.name}</h3>
+      <p>${story.description}</p>
+    </div>
+  `);
     
     return map;
-  } catch (error) {
-    console.error('Error initializing detail map:', error);
+}
+
+// Initialize map for adding new story
+export function initAddStoryMap(containerId, locationDisplayId) {
+  const map = L.map(containerId).setView([-6.2088, 106.8456], 13);
+  
+  // Base layers with more options
+  const baseMaps = {
+    "Default": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }),
+    "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    }),
+    "Terrain": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
+    }),
+    "Dark": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    })
+  };
+
+  // Add default layer
+  baseMaps["Default"].addTo(map);
+
+  // Add layer control with custom styling
+  const layerControl = L.control.layers(baseMaps, null, {
+    position: 'topright',
+    collapsed: false
+  }).addTo(map);
+
+  // Customize layer control appearance
+  const layerControlContainer = document.querySelector('.leaflet-control-layers');
+  if (layerControlContainer) {
+    layerControlContainer.style.padding = '10px';
+    layerControlContainer.style.background = 'white';
+    layerControlContainer.style.borderRadius = '8px';
+    layerControlContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+  }
+
+  let marker = null;
+  const locationDisplay = document.getElementById(locationDisplayId);
+
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    
+    if (marker) {
+      map.removeLayer(marker);
+    }
+
+    marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup('Lokasi cerita Anda').openPopup();
+    
+    if (locationDisplay) {
+      locationDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+  });
+
+  // Add getSelectedLocation method
+  map.getSelectedLocation = () => {
+    if (marker) {
+      const latlng = marker.getLatLng();
+      return {
+        lat: latlng.lat,
+        lon: latlng.lng
+      };
+    }
     return null;
-  }
-}
+  };
 
-// Inisialisasi peta untuk menambah cerita
-function initAddStoryMap(containerId, locationDisplayId) {
-  console.log('Initializing map for adding story');
-  
-  // Hapus peta yang sudah ada jika ada
-  if (map) {
-    console.log('Removing existing map');
-    map.remove();
-    map = null;
-  }
-  
-  const mapContainer = document.getElementById(containerId);
-  if (!mapContainer) {
-    console.error('Map container not found:', containerId);
-    return { map: null, getSelectedLocation: () => ({ lat: null, lon: null }) };
-  }
-  
-  // Reset koordinat
-  selectedLat = null;
-  selectedLon = null;
-  
-  // Buat peta baru
-  try {
-    map = L.map(containerId).setView([-2.548926, 118.0148634], 5);
-    
-    // Tambahkan tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-    
-    // Tambahkan event listener untuk klik
-    map.on('click', (e) => {
-      selectedLat = e.latlng.lat;
-      selectedLon = e.latlng.lng;
-      
-      console.log('Selected location:', selectedLat, selectedLon);
-      
-      // Hapus marker lama jika ada
-      if (marker) map.removeLayer(marker);
-      
-      // Tambahkan marker baru
-      marker = L.marker([selectedLat, selectedLon]).addTo(map);
-      
-      // Update display koordinat
-      const locDisplay = document.getElementById(locationDisplayId);
-      if (locDisplay) {
-        locDisplay.innerText = `${selectedLat.toFixed(4)}, ${selectedLon.toFixed(4)}`;
-      } else {
-        console.error('Location display element not found:', locationDisplayId);
-      }
-    });
-    
-    return {
-      map,
-      getSelectedLocation: () => ({ lat: selectedLat, lon: selectedLon })
-    };
-  } catch (error) {
-    console.error('Error initializing add story map:', error);
-    return { map: null, getSelectedLocation: () => ({ lat: null, lon: null }) };
-  }
+  return map;
 }
-
-export {
-  initStoryListMap,
-  initStoryDetailMap,
-  initAddStoryMap
-};

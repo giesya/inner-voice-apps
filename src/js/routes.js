@@ -41,3 +41,13 @@ function router() {
 export {
   router
 };
+
+// Alias global agar sesuai permintaan user
+window.app = window.app || {};
+window.app.renderPage = router;
+
+window.addEventListener('hashchange', async () => {
+  await window.app.renderPage();
+  // Matikan semua media aktif
+  window.Camera.stopAllStreams();
+});

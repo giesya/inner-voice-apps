@@ -1,138 +1,107 @@
-import { fetchStories } from '../api.js';
+import { HomeModel } from '../models/homeModel.js';
+import { HomePresenter } from '../presenters/homePresenter.js';
 import { initStoryListMap } from '../utils/mapUtils.js';
-import { showLoading, showError, formatDate, pageTransition } from '../utils/helpers.js';
+import { formatDate } from '../utils/helpers.js';
 
-// State nyimpan data stories
-let stories = [];
-
-// Render tampilan beranda
-function renderHomeView() {
-  console.log('Rendering home view with', stories.length, 'stories');
-  
-  const mainContent = document.getElementById('maincontent');
-  if (!mainContent) {
-    console.error('Main content element not found');
-    return;
-  }
-  
-  mainContent.innerHTML = '';
-  pageTransition();
-  
-  // Tombol Logout / Login
-  const actionDiv = document.createElement('div');
-  actionDiv.className = 'action-buttons';
-  
-  if (localStorage.getItem('token')) {
-    const btnLogout = document.createElement('button');
-    btnLogout.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-    btnLogout.onclick = logout;
-    actionDiv.appendChild(btnLogout);
-  } else {
-    const btnLogin = document.createElement('button');
-    btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login / Daftar';
-    btnLogin.onclick = () => { location.hash = '#/login'; };
-    actionDiv.appendChild(btnLogin);
+export class HomeView {
+  constructor() {
+    this.model = new HomeModel();
+    this.presenter = new HomePresenter(this.model, this);
   }
 
-  // Tombol tambah
-  const btnAdd = document.createElement('button');
-  btnAdd.innerHTML = '<i class="fas fa-plus"></i> Tambah Cerita';
-  btnAdd.onclick = () => { location.hash = '#/add'; };
-  actionDiv.appendChild(btnAdd);
-  
-  mainContent.appendChild(actionDiv);
-  
-  // Title section
-  const titleSection = document.createElement('div');
-  titleSection.className = 'section-title';
-  titleSection.innerHTML = '<h2>Cerita Terbaru</h2>';
-  mainContent.appendChild(titleSection);
-
-  // Data list dari story
-  const listDiv = document.createElement('div');
-  listDiv.className = 'story-list';
-
-  if (!stories.length) {
-    listDiv.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-book-open"></i>
-        <p>Tidak ada cerita.</p>
-      </div>
-    `;
-  } else {
-    stories.forEach(story => {
-      const card = document.createElement('div');
-      card.className = 'story-card';
-      card.setAttribute('aria-label', `Cerita oleh ${story.name}`);
-      card.onclick = () => { location.hash = `#/story/${story.id}`; };
-      
-      // background untuk card list
-      const gradients = [
-        'linear-gradient(135deg, #E3FDFD, #A6E3E9)',
-        'linear-gradient(135deg, #DCD6F7, #BBE1FA)',
-        'linear-gradient(135deg, #F8E2CF, #F5C6AA)',
-        'linear-gradient(135deg, #DDFFBC, #AACB73)'
-      ];
-      const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
-      card.style.background = randomGradient;
-      
-      card.innerHTML = `
-        <img src="${story.photoUrl}" alt="Foto cerita ${story.name}" />
-        <div class="story-info">
-          <h3>${story.name}</h3>
-          <p>${story.description.length > 100 ? story.description.substring(0, 100) + '...' : story.description}</p>
-          <div class="story-meta">
-            <span><i class="fas fa-calendar-alt"></i> ${formatDate(story.createdAt)}</span>
-          </div>
+  showLoading() {
+    const mainContent = document.getElementById('maincontent');
+    if (mainContent) {
+      mainContent.innerHTML = `
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Memuat cerita...</p>
         </div>
       `;
-      listDiv.appendChild(card);
-    });
-  }
-  mainContent.appendChild(listDiv);
-
-  // Map section
-  const mapSection = document.createElement('div');
-  mapSection.className = 'map-section';
-  mapSection.innerHTML = `
-    <h3>Lokasi Cerita</h3>
-    <div id="map"></div>
-  `;
-  mainContent.appendChild(mapSection);
-  
-  // inisialisasi map setelah di added to the DOM
-  setTimeout(() => {
-    initStoryListMap('map', stories);
-  }, 100);
-}
-
-// Logout function
-function logout() {
-  localStorage.removeItem('token');
-  alert('Berhasil keluar');
-  location.hash = '#/';
-}
-
-// Fetch stories from API and render home view
-async function showHomeView() {
-  showLoading();
-  
-  try {
-    const token = localStorage.getItem('token');
-    const data = await fetchStories(token);
-    
-    if (!data.error) {
-      stories = data.listStory;
-      renderHomeView();
-    } else {
-      showError('Gagal mengambil data: ' + data.message);
     }
-  } catch (error) {
-    console.error('Error in showHomeView:', error);
-    showError('Terjadi kesalahan saat mengambil data');
+  }
+
+  showError(message) {
+    alert(message);
+  }
+
+  showSuccess(message) {
+    alert(message);
+  }
+
+  redirectToHome() {
+    location.hash = '#/';
+  }
+
+  renderStories(stories) {
+    const mainContent = document.getElementById('maincontent');
+    if (!mainContent) return;
+
+    mainContent.innerHTML = `
+      <div class="stories-container home-content">
+        <div class="stories-header">
+          <h2>Daftar Cerita</h2>
+          <div class="user-actions">
+            ${localStorage.getItem('token') 
+              ? `<button id="addBtn" class="btn-primary">
+                  <i class="fas fa-plus"></i> Tambah Cerita
+                </button>
+                <button id="logoutBtn" class="btn-secondary">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>`
+              : `<button onclick="location.hash='#/login'" class="btn-primary">
+                  <i class="fas fa-sign-in-alt"></i> Login
+                </button>`
+            }
+          </div>
+        </div>
+        <div class="story-list">
+          ${stories.length === 0 
+            ? '<p class="no-stories">Belum ada cerita yang ditambahkan.</p>'
+            : stories.map(story => `
+                <div class="story-card" onclick="location.hash='#/story/${story.id}'">
+                  <div class="story-image">
+                    <img src="${story.photoUrl}" alt="${story.name}" loading="lazy">
+                  </div>
+                  <div class="story-content">
+                    <h3>${story.name}</h3>
+                    <p>${story.description}</p>
+                    <div class="story-meta">
+                      <span><i class="fas fa-calendar"></i> ${formatDate(story.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')
+          }
+        </div>
+        <div id="storyMap" class="story-map"></div>
+      </div>
+    `;
+
+    // Initialize map after stories are rendered
+    if (stories.length > 0) {
+      initStoryListMap('storyMap', stories);
+    }
+
+    // Event listener untuk tombol tambah dan logout
+    const addBtn = document.getElementById('addBtn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        location.hash = '#/add';
+      });
+    }
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        if (this.presenter && typeof this.presenter.logout === 'function') {
+          this.presenter.logout();
+        }
+      });
+    }
+  }
+
+  showHomeView() {
+    this.showLoading();
+    this.presenter.loadStories();
   }
 }
-
-export {
-  showHomeView
-};
