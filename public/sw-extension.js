@@ -1,0 +1,1 @@
+importScripts('./custom-sw.js');
